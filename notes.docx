@@ -1,0 +1,7 @@
+javascript does not understand html, thought when written as a string i.e using the ``
+can be written with.
+
+In react jsx is used, here is another language like javascript but also has the html syntax
+
+in jsx 'class' is a reserved word so it cann't be used oftenly like in the case of html
+therefore 'className' is used instead.
