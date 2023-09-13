@@ -52,7 +52,7 @@ const initialFacts = [
     votesInteresting: 9,
     votesMindblowing: 5,
     votesFalse: 1,
-    createdIn: 2010,
+    createdIn: 2011,
   },
 ];
 
