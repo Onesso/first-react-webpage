@@ -44,6 +44,7 @@ const initialFacts = [
     votesFalse: 1,
     createdIn: 2015,
   },
+<<<<<<< HEAD
   {
     id: 4,
     text: "React, sometimes referred to as a frontend JavaScript framework, is a JavaScript library created by Facebook.React is a tool for building UI components.",
@@ -54,6 +55,8 @@ const initialFacts = [
     votesFalse: 1,
     createdIn: 2011,
   },
+=======
+>>>>>>> a08b3fecb424a0c39698288ba6cc766d6043c397
 ];
 
 //end of the external code
@@ -89,12 +92,17 @@ function CategoryFilters() {
 
 function FactList() {
   //temporary
+<<<<<<< HEAD
   const facts = initialFacts; //this data in this component is needed to be passed to another container; the Fact container theirfore props is needed.
+=======
+  const facts = initialFacts;
+>>>>>>> a08b3fecb424a0c39698288ba6cc766d6043c397
 
   return (
     <section>
       <ul className="fact-list">
         {facts.map((data) => (
+<<<<<<< HEAD
           //in this component(father)(FactList) we are passing in other components child(Fact)
           <Fact key={data.id} data={data} />
         ))}
@@ -134,5 +142,35 @@ function Fact({ data }) {
       </div>
     </li>
   );
+=======
+          //this is not html this is jxs
+          <li key={data.id} className="facts">
+            <p>
+              {data.text}
+              <a href={data.source} translate="_blank" class="source">
+                Source
+              </a>
+            </p>
+            <span
+              className="tag"
+              style={{
+                backgroundColor: CATEGORIES.find(
+                  (catName) => catName.name === data.category
+                ).color,
+              }} //the style is an object hence the two carly braces
+            >
+              {data.category}
+            </span>
+            <div className="vote-button">
+              <button>👍 {data.votesInteresting}</button>
+              <button>🤯 {data.votesMindblowing}</button>
+              <button>⛔️ {data.votesFalse}</button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+>>>>>>> a08b3fecb424a0c39698288ba6cc766d6043c397
 }
 export default App;
