@@ -11,3 +11,10 @@ starting with carly brackets {} the style is written as an object so it is insid
 {{backgroundColor="white"}} an object can not have a dash and know the specific color is a string.
 
 in react each elements that is being looped should have a key which is declared with a eunique ID; this is for optimization
+
+what i need to learn from the today i learn project
+1.props
+2.useState()
+3.useEffect()
+4.Asysnchronous function
+5.The dependency array

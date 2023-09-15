@@ -7,6 +7,13 @@
   margin: 0px;
   padding: 0px;
 }
+.loaderMessage {
+  text-align: center;
+  text-transform: uppercase;
+  margin-top: 40px;
+  font-weight: bold;
+  font-size: 32px;
+}
 .header {
   margin-bottom: 40px;
   display: flex;
