@@ -38,7 +38,11 @@ function App() {
     }
     async function getFacts() {
       setIsLoading(true);
-      const { data: facts, error } = await supabase.from("facts").select("*");
+      const { data: facts, error } = await supabase
+        .from("facts")
+        .select("*")
+        .order("votesInteresting", { ascending: false })//sorting the data based on the number of high votes
+        .limit(1000);//limiting the number of votes that can be uploaded
       setfacts(facts);
       setIsLoading(false);
     }
