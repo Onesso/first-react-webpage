@@ -12,9 +12,16 @@ starting with carly brackets {} the style is written as an object so it is insid
 
 in react each elements that is being looped should have a key which is declared with a eunique ID; this is for optimization
 
+when ever we must reload the user interface we need state
+
+
+
+
 what i need to learn from the today i learn project
 1.props
 2.useState()
 3.useEffect()
 4.Asysnchronous function
 5.The dependency array
+6.callback function
+7.category filter

@@ -30,24 +30,34 @@ function App() {
   const [ShowForm, setShowForm] = useState(false);
   const [facts, setfacts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState("all");
 
   //the empty array in the function in the useEffect will ensure that the function only runs once, as soon the first component renders
-  useEffect(function () {
-    {
-      /*supabase take time to load the data so we must wait and wait is only used in an async function therefore the async is created inside the function of the useState */
-    }
-    async function getFacts() {
-      setIsLoading(true);
-      const { data: facts, error } = await supabase
-        .from("facts")
-        .select("*")
-        .order("votesInteresting", { ascending: false })//sorting the data based on the number of high votes
-        .limit(1000);//limiting the number of votes that can be uploaded
-      setfacts(facts);
-      setIsLoading(false);
-    }
-    getFacts();
-  }, []);
+  useEffect(
+    function () {
+      {
+        /*supabase take time to load the data so we must wait and wait is only used in an async function therefore the async is created inside the function of the useState */
+      }
+      async function getFacts() {
+        setIsLoading(true);
+
+        let quary = supabase.from("facts").select("*");
+
+        if (currentCategory !== "all")
+          quary = quary.eq("category", currentCategory);
+
+        const { data: facts, error } = await quary
+          .order("created_at", { ascending: false }) //sorting the data based on the number of high votes
+          .limit(1000); //limiting the number of votes that can be uploaded
+
+        if (!error) setfacts(facts);
+        else alert("There is an error fetching the data");
+        setIsLoading(false);
+      }
+      getFacts();
+    },
+    [currentCategory]
+  ); //currentCategory is added in the dependancy since it change; the dependancy array is here so that is can enable react to load once, therefore the function will be loading whenever the CurrentCategory changes
 
   return (
     <>
@@ -62,7 +72,7 @@ function App() {
       ) : null}
 
       <main className="main">
-        <CategoryFilters />
+        <CategoryFilters setCurrentCategory={setCurrentCategory} />
         {isLoading ? <Loader /> : <FactList facts={facts} />}
       </main>
     </>
@@ -102,33 +112,27 @@ function isValidHttpUrl(string) {
     return false;
   }
 }
-
+//only async function can await promises and make the function stop
 function NewFactForm({ setfacts, setShowForm }) {
   const [text, setText] = useState("");
   const [source, setSource] = useState("");
   const [category, setCategory] = useState("");
   const textLength = text.length;
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     //1.preventing react from reloading the page
     e.preventDefault();
     console.log(text, source, category);
 
     //2.Checking if the data is valid
     if (text && isValidHttpUrl(source) && category && text.length <= 250) {
-      //3.Create a new fact object
-      const newFact = {
-        id: Math.round(Math.random() * 10000000000000),
-        text, //in the situation where the data to be passed in the object has the same name only one name is written followed with a comma
-        source,
-        category,
-        votesInteresting: 0,
-        votesMindblowing: 0,
-        votesFalse: 0,
-        createdIn: new Date().getFullYear(),
-      };
+      //3.Create a new fact object and upload to supabase
+      const { data: newFact, error } = await supabase
+        .from("facts")
+        .insert([{ text, source, category }])
+        .select(); //select() is added on the query so that we can get the data back(supabase will the data from the server to back to the  client) and upload the state
       //4.Add the new fact object to the Ul:add the fact to state
-      setfacts((facts) => [newFact, ...facts]);
+      setfacts((facts) => [newFact[0], ...facts]); //supabase returns an arrary of one object hence the selection of the newFact[0]
       //5.Reset input fields
       setText("");
       setCategory("");
@@ -151,7 +155,7 @@ function NewFactForm({ setfacts, setShowForm }) {
       <span> {250 - textLength} </span>
       <input
         type="text"
-        placeholder="Trust worthy source"
+        placeholder="https://example.com"
         value={source}
         onChange={(e) => setSource(e.target.value)}
       />
@@ -168,18 +172,24 @@ function NewFactForm({ setfacts, setShowForm }) {
   );
 }
 
-function CategoryFilters() {
+function CategoryFilters({ setCurrentCategory }) {
   return (
     <aside>
       <ul>
         <li>
-          <button className="btn btn-all-category">All</button>
+          <button
+            className="btn btn-all-category"
+            onClick={() => setCurrentCategory("all")}
+          >
+            All
+          </button>
         </li>
         {CATEGORIES.map((cate) => (
           <li key={cate.name}>
             <button
               className="btn btn-category"
               style={{ backgroundColor: cate.color }}
+              onClick={() => setCurrentCategory(cate.name)}
             >
               {cate.name}
             </button>
@@ -214,6 +224,13 @@ function Counter() {
 
 function FactList({ facts }) {
   //this data in this component is needed to be passed to another container; the Fact container theirfore props is needed.
+
+  if (facts.length === 0)
+    return (
+      <p className="loaderMessage">
+        No facts for this category yet!! Create and be the first one 🥇
+      </p>
+    );
 
   return (
     <section>
