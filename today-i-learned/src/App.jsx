@@ -12,9 +12,7 @@ const CATEGORIES = [
   { name: "history", color: "#f97316" },
   { name: "news", color: "#8b5cf6" },
 ];
-{
-  /* end of the external code*/
-}
+
 
 function App() {
   {
@@ -31,6 +29,7 @@ function App() {
   const [facts, setfacts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentCategory, setCurrentCategory] = useState("all");
+  
 
   //the empty array in the function in the useEffect will ensure that the function only runs once, as soon the first component renders
   useEffect(
@@ -117,22 +116,26 @@ function NewFactForm({ setfacts, setShowForm }) {
   const [text, setText] = useState("");
   const [source, setSource] = useState("");
   const [category, setCategory] = useState("");
+  const [isUpLoading, setIsUpLoading] = useState(false);
   const textLength = text.length;
 
   async function handleSubmit(e) {
     //1.preventing react from reloading the page
     e.preventDefault();
-    console.log(text, source, category);
 
     //2.Checking if the data is valid
     if (text && isValidHttpUrl(source) && category && text.length <= 250) {
       //3.Create a new fact object and upload to supabase
+
+      setIsUpLoading(true);//it is set to true so that isUpLoading 'becomes true' which is passed through the diasble variable
       const { data: newFact, error } = await supabase
         .from("facts")
         .insert([{ text, source, category }])
         .select(); //select() is added on the query so that we can get the data back(supabase will the data from the server to back to the  client) and upload the state
-      //4.Add the new fact object to the Ul:add the fact to state
-      setfacts((facts) => [newFact[0], ...facts]); //supabase returns an arrary of one object hence the selection of the newFact[0]
+        setIsUpLoading(false);//it is set to false meaning that the data is already sent to and sent back again to placed in the factlist; it will therefore enable adding of new data
+        //4.Add the new fact object to the Ul:add the fact to state
+      if(!error)setfacts((facts) => [newFact[0], ...facts]); //supabase returns an arrary of one object hence the selection of the newFact[0]
+
       //5.Reset input fields
       setText("");
       setCategory("");
@@ -151,6 +154,7 @@ function NewFactForm({ setfacts, setShowForm }) {
         placeholder="Share a fact with the world"
         value={text}
         onChange={(e) => setText(e.target.value)}
+        disabled={isUpLoading}
       />
       <span> {250 - textLength} </span>
       <input
@@ -158,8 +162,9 @@ function NewFactForm({ setfacts, setShowForm }) {
         placeholder="https://example.com"
         value={source}
         onChange={(e) => setSource(e.target.value)}
+        disabled={isUpLoading}
       />
-      <select value={category} onChange={(e) => setCategory(e.target.value)}>
+      <select value={category} onChange={(e) => setCategory(e.target.value)}disabled={isUpLoading}>
         <option value="">Choose category:</option>
         {CATEGORIES.map((cate) => (
           <option key={cate.name} value={cate.name}>
@@ -167,7 +172,7 @@ function NewFactForm({ setfacts, setShowForm }) {
           </option>
         ))}
       </select>
-      <button className="btn btn-large">Post</button>
+      <button className="btn btn-large" disabled={isUpLoading}>Post</button>
     </form>
   );
 }

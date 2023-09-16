@@ -17,6 +17,7 @@ when ever we must reload the user interface we need state
 
 
 
+
 what i need to learn from the today i learn project
 1.props
 2.useState()
@@ -25,3 +26,4 @@ what i need to learn from the today i learn project
 5.The dependency array
 6.callback function
 7.category filter
+8.the disable attribute
