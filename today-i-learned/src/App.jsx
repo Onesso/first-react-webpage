@@ -13,7 +13,6 @@ const CATEGORIES = [
   { name: "news", color: "#8b5cf6" },
 ];
 
-
 function App() {
   {
     /* below is a state variable using a useState hook */
@@ -29,7 +28,6 @@ function App() {
   const [facts, setfacts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentCategory, setCurrentCategory] = useState("all");
-  
 
   //the empty array in the function in the useEffect will ensure that the function only runs once, as soon the first component renders
   useEffect(
@@ -72,7 +70,11 @@ function App() {
 
       <main className="main">
         <CategoryFilters setCurrentCategory={setCurrentCategory} />
-        {isLoading ? <Loader /> : <FactList facts={facts} />}
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <FactList facts={facts} setfacts={setfacts} />
+        )}
       </main>
     </>
   );
@@ -127,14 +129,14 @@ function NewFactForm({ setfacts, setShowForm }) {
     if (text && isValidHttpUrl(source) && category && text.length <= 250) {
       //3.Create a new fact object and upload to supabase
 
-      setIsUpLoading(true);//it is set to true so that isUpLoading 'becomes true' which is passed through the diasble variable
+      setIsUpLoading(true); //it is set to true so that isUpLoading 'becomes true' which is passed through the diasble variable
       const { data: newFact, error } = await supabase
         .from("facts")
         .insert([{ text, source, category }])
         .select(); //select() is added on the query so that we can get the data back(supabase will the data from the server to back to the  client) and upload the state
-        setIsUpLoading(false);//it is set to false meaning that the data is already sent to and sent back again to placed in the factlist; it will therefore enable adding of new data
-        //4.Add the new fact object to the Ul:add the fact to state
-      if(!error)setfacts((facts) => [newFact[0], ...facts]); //supabase returns an arrary of one object hence the selection of the newFact[0]
+      setIsUpLoading(false); //it is set to false meaning that the data is already sent to and sent back again to placed in the factlist; it will therefore enable adding of new data
+      //4.Add the new fact object to the Ul:add the fact to state
+      if (!error) setfacts((facts) => [newFact[0], ...facts]); //supabase returns an arrary of one object hence the selection of the newFact[0]
 
       //5.Reset input fields
       setText("");
@@ -164,7 +166,11 @@ function NewFactForm({ setfacts, setShowForm }) {
         onChange={(e) => setSource(e.target.value)}
         disabled={isUpLoading}
       />
-      <select value={category} onChange={(e) => setCategory(e.target.value)}disabled={isUpLoading}>
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        disabled={isUpLoading}
+      >
         <option value="">Choose category:</option>
         {CATEGORIES.map((cate) => (
           <option key={cate.name} value={cate.name}>
@@ -172,7 +178,9 @@ function NewFactForm({ setfacts, setShowForm }) {
           </option>
         ))}
       </select>
-      <button className="btn btn-large" disabled={isUpLoading}>Post</button>
+      <button className="btn btn-large" disabled={isUpLoading}>
+        Post
+      </button>
     </form>
   );
 }
@@ -227,7 +235,8 @@ function Counter() {
   );
 }
 
-function FactList({ facts }) {
+//this is a component of facts; where the facts are listed
+function FactList({ facts, setfacts }) {
   //this data in this component is needed to be passed to another container; the Fact container theirfore props is needed.
 
   if (facts.length === 0)
@@ -242,7 +251,7 @@ function FactList({ facts }) {
       <ul className="fact-list">
         {facts.map((data) => (
           //in this component(father)(FactList) we are passing in other components child(Fact)
-          <Fact key={data.id} data={data} />
+          <Fact key={data.id} data={data} setfacts={setfacts} />
         ))}
       </ul>
       <p>
@@ -253,7 +262,27 @@ function FactList({ facts }) {
   );
 }
 
-function Fact({ data }) {
+//this is a fact component
+function Fact({ data, setfacts }) {
+  const[isUpdating, setIsUpdating ]= useState(false)
+
+  //the function below handles the voting, it makes the update to the supabase then supabase returns data only of the specified id in an array form.
+
+  // ====this function is generalised to suet all three of the voting=====
+  //a string is passed to the function then the same string is used in the update section when quarrying supabase
+  async function handleVote() {
+    setIsUpdating(true)
+    const { data: updatedFact, error } = await supabase
+      .from("facts")
+      .update({ votesInteresting: data.votesInteresting + 1 })
+      .eq("id", data.id)//update is only done to this object
+      .select();
+      setIsUpdating(false)
+    if (!error)
+      setfacts((facts) =>
+        facts.map((f) => (f.id === data.id ? updatedFact[0] : f))//the fact thst was voted on is the only one the would be update the rest nothing happens to them
+      );
+  }
   return (
     //this is not html this is jxs
     <li className="facts">
@@ -274,7 +303,9 @@ function Fact({ data }) {
         {data.category}
       </span>
       <div className="vote-button">
-        <button>👍 {data.votesInteresting}</button>
+        <button onClick={handleVote} disabled={isUpdating}>
+          👍 {data.votesInteresting}
+        </button>
         <button>🤯 {data.votesMindblowing}</button>
         <button>⛔️ {data.votesFalse}</button>
       </div>
