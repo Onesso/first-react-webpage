@@ -264,23 +264,23 @@ function FactList({ facts, setfacts }) {
 
 //this is a fact component
 function Fact({ data, setfacts }) {
-  const[isUpdating, setIsUpdating ]= useState(false)
+  const [isUpdating, setIsUpdating] = useState(false);
 
   //the function below handles the voting, it makes the update to the supabase then supabase returns data only of the specified id in an array form.
 
   // ====this function is generalised to suet all three of the voting=====
   //a string is passed to the function then the same string is used in the update section when quarrying supabase
-  async function handleVote() {
-    setIsUpdating(true)
+  async function handleVote(columnName) {
+    setIsUpdating(true);
     const { data: updatedFact, error } = await supabase
       .from("facts")
-      .update({ votesInteresting: data.votesInteresting + 1 })
-      .eq("id", data.id)//update is only done to this object
+      .update({ [columnName]: data[columnName] + 1 })
+      .eq("id", data.id) //update is only done to this object
       .select();
-      setIsUpdating(false)
+    setIsUpdating(false);
     if (!error)
-      setfacts((facts) =>
-        facts.map((f) => (f.id === data.id ? updatedFact[0] : f))//the fact thst was voted on is the only one the would be update the rest nothing happens to them
+      setfacts(
+        (facts) => facts.map((f) => (f.id === data.id ? updatedFact[0] : f)) //the fact thst was voted on is the only one the would be update the rest nothing happens to them
       );
   }
   return (
@@ -303,11 +303,22 @@ function Fact({ data, setfacts }) {
         {data.category}
       </span>
       <div className="vote-button">
-        <button onClick={handleVote} disabled={isUpdating}>
+        {/*In generalizing the vote function we are not to call the function but rather to define the function */}
+        <button
+          onClick={() => handleVote("votesInteresting")}
+          disabled={isUpdating}
+        >
           👍 {data.votesInteresting}
         </button>
-        <button>🤯 {data.votesMindblowing}</button>
-        <button>⛔️ {data.votesFalse}</button>
+        <button
+          onClick={() => handleVote("votesMindblowing")}
+          disabled={isUpdating}
+        >
+          🤯 {data.votesMindblowing}
+        </button>
+        <button onClick={() => handleVote("votesFalse")} disabled={isUpdating}>
+          ⛔️ {data.votesFalse}
+        </button>
       </div>
     </li>
   );
