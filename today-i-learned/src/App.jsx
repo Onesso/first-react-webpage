@@ -247,7 +247,7 @@ function FactList({ facts, setfacts }) {
     );
 
   return (
-    <section>
+    <section className="section">
       <ul className="fact-list">
         {facts.map((data) => (
           //in this component(father)(FactList) we are passing in other components child(Fact)
@@ -265,6 +265,8 @@ function FactList({ facts, setfacts }) {
 //this is a fact component
 function Fact({ data, setfacts }) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const isDispute =
+    data.votesInteresting + data.votesMindblowing < data.votesFalse;
 
   //the function below handles the voting, it makes the update to the supabase then supabase returns data only of the specified id in an array form.
 
@@ -287,6 +289,7 @@ function Fact({ data, setfacts }) {
     //this is not html this is jxs
     <li className="facts">
       <p>
+        {isDispute ? <span className="disputed">[🚩RUMOURS]</span> : null}
         {data.text}
         <a href={data.source} translate="_blank" class="source">
           Source
