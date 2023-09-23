@@ -324,6 +324,7 @@ function Fact({ data, setfacts }) {
         </button>
       </div>
     </li>
+
   );
 }
 export default App;
